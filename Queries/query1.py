@@ -26,7 +26,7 @@ if __name__ == "__main__":
     3 Result         object
     4 WhiteElo        int64
     5 BlackElo        int64
-    6 ECO            object
+    6 ECO            object 
     7 Opening        object
     8 TimeControl    object
     9 Termination    object
