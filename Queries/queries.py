@@ -68,7 +68,6 @@ if __name__ == "__main__":
         else:
             return eloNames[10]
 
-
     '''
     Chess:
     0 Event
@@ -88,10 +87,20 @@ if __name__ == "__main__":
     14 boolEnroques
     '''
 
+    def boolEnroque(mov):
+        if mov.contains('-'):
+            return 1
+        return 0
+
+    def jaqueMate(mov):
+        nJaque = mov.count('+')
+        if mov.contains('++'):
+            nJaque -= 1
+        return nJaque
+
     chess = lines.map(lambda line: (line[0], line[1]+'#'+line[2], line[3], line[4], line[5], \
         eloDefiner(line[4], line[5]), line[6], line[7], line[8], line[9], line[10], \
-        line[10].count('.'), line[10].count('x'), line[10].count('+'), ))
-
+        line[10].count('.'), line[10].count('x'), jaqueMate(line[10]), boolEnroque(line[10])))
 
     
     chess_cached = chess.cache()
@@ -141,4 +150,4 @@ if __name__ == "__main__":
 
     # Aperturas que generan ganadores de negras
     # (apertura#tipoEvento, result)
-    eventResult = chess_cached.map(lambda line: (line[7]+'#'+line[0], ))
+    eventResult = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[7]))
