@@ -43,30 +43,18 @@ if __name__ == "__main__":
 
     def eloDefiner(wElo, bElo):
         avgElo = statistics.mean([wElo, bElo])
-        eloNames = ['novice', 'class D', 'class C', 'class B', 'class A', 'CM', 'CM-NM', \
-            'FM-IM', 'IM-GM', 'GM', 'SGM']
+        eloNamesU2000 = ['']*2+['class D']*2+['class C']*2+['class B']*2+['class A']*2
+        eloNamesO2000 =  ['CM']*2+['CM-NM','FM-IM','IM-GM']+ ['GM']*2
+
         if avgElo < 1200:
-            return eloNames[0]
-        elif avgElo < 1400:
-            return eloNames[1]
-        elif avgElo < 1600:
-            return eloNames[2]
-        elif avgElo < 1800:
-            return eloNames[3]
-        elif avgElo < 2000:
-            return eloNames[4]
-        elif avgElo < 2200:
-            return eloNames[5]
-        elif avgElo < 2300:
-            return eloNames[6]
-        elif avgElo < 2400:
-            return eloNames[7]
-        elif avgElo < 2500:
-            return eloNames[8]
+            return 'novice'
         elif avgElo < 2700:
-            return eloNames[9]
-        else:
-            return eloNames[10]
+            limit = int(avgElo/1000)
+            index = int((avgElo-(limit*1000))/100)
+            return eloNamesU2000[index] if limit < 2 else eloNamesO2000[index]
+        else: # >= 2700
+            return 'SGM'
+
 
     '''
     Chess:
