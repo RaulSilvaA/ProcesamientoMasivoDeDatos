@@ -133,9 +133,38 @@ if __name__ == "__main__":
     #(nMovimientos, avg_piezas_comidas)
     avgComNMov = pComidasNMov.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
+    ###################CANTIDAD DE JAQUES####################################
+
+    #(Event, cantidad de jaques)
+    nJaquesEvent =   chess_cached.map(lambda line: (line[0], line[13]))
+
+    ######SEGUN EL TIPO DE PARTIDA
+    #(cantidad de jaques, cantidad de partidas de cierto tipo)
+    nJaquesEvent = nJaquesEvent.aggregateByKey((0.0, 0), \
+        lambda sumCount, nJaques: (sumCount[0] + nJaques, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+    
+    #(Event, avg_jaques)
+    avgJaquesEvent = nJaquesEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
 
+    ######SEGUN ELO
+    #(EloBlock, cantidad de jaques)
+    nJaquesElo = chess_cached.map(lambda line: (line[5], line[13]))
 
+    #(cantidad de jaques, cantidad de partidas de cierto ELO)
+    nJaquesElo = comElo.aggregateByKey((0.0, 0), \
+        lambda sumCount, nJaques: (sumCount[0] + nJaques, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+    
+    #(Event, avg_jaques)
+    avgJaquesElo = nJaquesElo.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
+
+     ###################APERTURAS QUE GENERAN TABLAS####################################
+     
     # Aperturas que generan ganadores de negras
     # (apertura#tipoEvento, result)
     eventResult = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[7]))
