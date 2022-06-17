@@ -4,7 +4,6 @@ from curses import raw
 
 import sys
 import statistics
-from unittest.mock import seal
 from pyspark.sql import SparkSession
 
 
@@ -58,21 +57,22 @@ if __name__ == "__main__":
 
     '''
     Chess:
-    0 Event
-    1 White#Black
-    2 Result
-    3 WhiteElo
-    4 BlackElo
-    5 pEloBlock
-    6 Eco
-    7 Opening
-    8 TimeControl
-    9 Temination
-    10 AN
-    11 nMovimientos
-    12 nComidas
-    13 nJaques
-    14 boolEnroques
+    0 id
+    1 Event
+    2 White#Black
+    3 Result
+    4 WhiteElo
+    5 BlackElo
+    6 pEloBlock
+    7 Eco
+    8 Opening
+    9 TimeControl
+    10 Temination 
+    11 AN
+    12 nMovimientos
+    13 nComidas
+    14 nJaques
+    15 boolEnroques
     '''
 
     def boolEnroque(mov):
@@ -86,9 +86,9 @@ if __name__ == "__main__":
             nJaque -= 1
         return nJaque
 
-    chess = lines.map(lambda line: (line[0], line[1]+'#'+line[2], line[3], line[4], line[5], \
-        eloDefiner(line[4], line[5]), line[6], line[7], line[8], line[9], line[10], \
-        line[10].count('.'), line[10].count('x'), jaqueMate(line[10]), boolEnroque(line[10])))
+    chess = lines.map(lambda line: (line[1], line[2]+'#'+line[3], line[4], line[5], line[6], \
+        eloDefiner(line[5], line[6]), line[7], line[8], line[9], line[10], line[11], \
+        line[11].count('.'), line[11].count('x'), jaqueMate(line[11]), boolEnroque(line[11])))
 
     
     chess_cached = chess.cache()
@@ -186,6 +186,68 @@ if __name__ == "__main__":
 
     #(Opening#Event, avg_tablas)
     avgTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
+    avgTablasEvent.saveAsTextFile(fileout)
+
+    spark.stop()
+
+
+    ###################ENROQUES####################################
+
+    #(Event, boolEnroques)
+    nEnroquesEvent =   chess_cached.map(lambda line: (line[0], line[14]))
+
+    ######SEGUN EL TIPO DE PARTIDA
+    #(boolEnroques, cantidad de partidas de cierto tipo)
+    nEnroquesEvent = nEnroquesEvent.aggregateByKey((0.0, 0), \
+        lambda sumCount, nEnroques: (sumCount[0] + nEnroques, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+    
+    #(Event, avg_enroques)
+    avgEnroquesEvent = nEnroquesEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
+
+    ######SEGUN ELO
+    #(EloBlock, boolEnroques)
+    nEnroquesElo = chess_cached.map(lambda line: (line[5], line[14]))
+
+    #(boolEnroques, cantidad de partidas de cierto ELO)
+    nEnroquesElo = nEnroquesElo.aggregateByKey((0.0, 0), \
+        lambda sumCount, nEnroques: (sumCount[0] + nEnroques, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+    
+    #(ELO, avg_enroques)
+    avgEnroquesElo = nEnroquesElo.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
+
+    ######SEGÚN LARGO DE PARTIDA
+    nEnroquesDuration = chess_cached.map(lambda line: (line[11], line[14]))
+
+    #(boolEnroques, cantidad de partidas de cierta duración)
+    nEnroquesDuration = nEnroquesDuration.aggregateByKey((0.0, 0), \
+        lambda sumCount, nEnroques: (sumCount[0] + nEnroques, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+    
+    #(Duration, avg_enroques)
+    avgEnroquesDuration = nEnroquesDuration.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
+    ###################APERTURAS QUE GENERAN WIN DE BLANCAS####################################
+    openingEvent = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[2]))
+
+    filteredOpeningEvent = openingEvent.filter(openingEvent[1] == '1-0')
+
+    #(cantidad de tablas, cantidad de partidas de tipo Opening#Event)
+    nTablasEvent = filteredOpeningEvent.aggregateByKey((0.0, 0), \
+        lambda sumCount, nTablas: (sumCount[0] + nTablas, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+
+    #(Opening#Event, avg_tablas)
+    avgTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+
 
     # Aperturas que generan ganadores de negras
     # (apertura#tipoEvento, result)

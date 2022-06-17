@@ -6,6 +6,15 @@ En principio se pretenden realizar las siguientes quieries:
 
 - ***QUERY1:*** map de cantidad de movimientos realizados en la partida (por tipo de evento)
 
+### ToDo's
+- 1. pre-proceso para eliminar espacios (todos, algunas: opening, eventos, ...)
+- 2. juntar ECO#Opening
+- 3. Adaptar las querys
+- 5. Separar los archivos
+- 6. Correr las querys
+- 7. Pensar en Query (o querys) suprema
+- 8. (Opcional) hacer coalesce
+
 #Nick
 - cantidad de tipos de enroques (blancas o negras; por ELO - tipo de partida - largo de partida - #movimiento)
 
