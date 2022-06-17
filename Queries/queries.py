@@ -174,7 +174,19 @@ if __name__ == "__main__":
     avgJaquesDuration = nJaquesDuration.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
     ###################APERTURAS QUE GENERAN TABLAS####################################
+    openingEvent = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[2]))
+
+    filteredOpeningEvent = openingEvent.filter(openingEvent[1] == '1/2-1/2')
+
+    #(cantidad de tablas, cantidad de partidas de tipo Opening#Event)
+    nTablasEvent = filteredOpeningEvent.aggregateByKey((0.0, 0), \
+        lambda sumCount, nTablas: (sumCount[0] + nTablas, sumCount[1] + 1), \
+        lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
+        )
+
+    #(Opening#Event, avg_tablas)
+    avgTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
     # Aperturas que generan ganadores de negras
     # (apertura#tipoEvento, result)
-    eventResult = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[7]))
+    #eventResult = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[7]))
