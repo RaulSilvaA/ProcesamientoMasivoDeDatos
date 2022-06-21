@@ -187,9 +187,9 @@ if __name__ == "__main__":
     #(Opening#Event, avg_tablas)
     avgTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
-    avgTablasEvent.saveAsTextFile(fileout)
+    avgTablasEventSorted = avgTablasEvent.sortByKey(False)
 
-    spark.stop()
+    top10Tablas = avgTablasEventSorted.takeSample(False, 10, 1)
 
 
     ###################ENROQUES####################################

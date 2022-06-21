@@ -2,7 +2,6 @@ from __future__ import print_function
 from curses import raw
 
 import sys
-from unittest.mock import seal
 from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
@@ -20,6 +19,7 @@ if __name__ == "__main__":
     lines = inputRDD.map(lambda line: line.split(","))
 
     '''
+    0 id
     0 Event          object
     1 White          object
     2 Black          object
@@ -37,10 +37,10 @@ if __name__ == "__main__":
     #rawChess = lines.filter(lambda line: ("TV_SERIES" == line[6]) and not ('null' == line[7]))
 
     #(Event, AN)
-    movEvent = lines.map(lambda tup: (tup[0], tup[10]))
+    movEvent = lines.map(lambda tup: (tup[1], tup[11]))
 
     #(Event, numero_de_movimientos)
-    nMovementsEvent = movEvent(lambda line: (line[0], len(line[1].split('.'))-1))
+    nMovementsEvent = movEvent.map(lambda line: (line[0], len(line[1].split('.'))-1))
 
     #(Event, cantidad_promedio_de_movimientos)
     pMovementsEvent = nMovementsEvent.aggregateByKey((0.0, 0), \
