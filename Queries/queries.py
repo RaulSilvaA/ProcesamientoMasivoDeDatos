@@ -54,6 +54,12 @@ if __name__ == "__main__":
         else: # >= 2700
             return 'SGM'
 
+    def nTablas(r):
+        if r == "1/2-1/2":
+            return 1
+        else:
+            return 0
+
 
     '''
     Chess:
@@ -73,6 +79,7 @@ if __name__ == "__main__":
     13 nComidas
     14 nJaques
     15 boolEnroques
+    16 nTablas
     '''
 
     def boolEnroque(mov):
@@ -88,7 +95,7 @@ if __name__ == "__main__":
 
     chess = lines.map(lambda line: (line[1], line[2]+'#'+line[3], line[4], line[5], line[6], \
         eloDefiner(line[5], line[6]), line[7], line[8], line[9], line[10], line[11], \
-        line[11].count('.'), line[11].count('x'), jaqueMate(line[11]), boolEnroque(line[11])))
+        line[11].count('.'), line[11].count('x'), jaqueMate(line[11]), boolEnroque(line[11]), nTablas(line[4])))
 
     
     chess_cached = chess.cache()
@@ -174,22 +181,21 @@ if __name__ == "__main__":
     avgJaquesDuration = nJaquesDuration.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
     ###################APERTURAS QUE GENERAN TABLAS####################################
-    openingEvent = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[2]))
+    openingEvent = chess_cached.map(lambda line: (line[7]+'#'+line[0], line[15]))
 
-    filteredOpeningEvent = openingEvent.filter(openingEvent[1] == '1/2-1/2')
 
     #(cantidad de tablas, cantidad de partidas de tipo Opening#Event)
-    nTablasEvent = filteredOpeningEvent.aggregateByKey((0.0, 0), \
+    nTablasEvent = openingEvent.aggregateByKey((0.0, 0), \
         lambda sumCount, nTablas: (sumCount[0] + nTablas, sumCount[1] + 1), \
         lambda sumCountA, sumCountB: (sumCountA[0] + sumCountB[0], sumCountA[1] + sumCountB[1])
         )
 
     #(Opening#Event, avg_tablas)
-    avgTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
+    percentageTablasEvent = nTablasEvent.mapValues(lambda tup2n: tup2n[0]/tup2n[1])
 
-    avgTablasEvent.saveAsTextFile(fileout)
+    percentageTablasEventSorted = percentageTablasEvent.sortByKey(False)
 
-    spark.stop()
+    top10Tablas = percentageTablasEventSorted.takeSample(False, 10, 1)
 
 
     ###################ENROQUES####################################
