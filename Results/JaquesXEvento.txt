@@ -1,0 +1,8 @@
+('Correspondence', 4.140540540540541)
+('Classical', 4.706753525093476)
+('Bullet', 3.7260264483364423)
+('Blitz', 4.106840818029265)
+('Bullet tournament', 3.734398118428537)
+('Classical tournament', 4.324508708908142)
+('Blitz tournament', 4.002157700598397)
+('Event', 0.0)
